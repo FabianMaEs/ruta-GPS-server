@@ -9,6 +9,11 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
+// Ruta para verificar que el servidor está funcionando
+app.get('/', (req, res) => {
+  res.status(200).send({ message: 'Server is running' });
+});
+
 // Ruta para recibir y guardar las coordenadas
 app.post('/api/coordinates', (req, res) => {
   const { latitude, longitude } = req.body;
