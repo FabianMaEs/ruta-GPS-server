@@ -27,6 +27,9 @@ app.post('/api/coordinates', (req, res) => {
 
 // Ruta para obtener las coordenadas guardadas
 app.get('/api/coordinates', (req, res) => {
+  if (coordinates.length === 0) {
+    return res.status(404).send({ message: 'Coordinates not found' });
+  }
   res.status(200).send(coordinates);
 });
 
