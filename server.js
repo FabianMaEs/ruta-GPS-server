@@ -30,10 +30,13 @@ app.get('/api/coordinates', (req, res) => {
   res.status(200).send(coordinates);
 });
 
-// Servir la aplicación web
-app.get('*', (req, res) => {
-  res.sendFile(__dirname + 'index.html');
+// Ruta para borrar las coordenadas guardadas
+app.delete('/api/coordinates', (req, res) => {
+  coordinates.length = 0;
+  res.status(200).send({ message: 'Coordinates deleted' });
 });
+
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
