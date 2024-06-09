@@ -19,6 +19,7 @@ app.post('/api/coordinates', (req, res) => {
   const { latitude, longitude } = req.body;
   if (latitude && longitude) {
     coordinates.push({ latitude, longitude });
+    print("Guardadas: " + coordinates);
     res.status(200).send({ message: 'Coordinates saved' });
   } else {
     res.status(400).send({ message: 'Invalid coordinates' });
@@ -28,14 +29,17 @@ app.post('/api/coordinates', (req, res) => {
 // Ruta para obtener las coordenadas guardadas
 app.get('/api/coordinates', (req, res) => {
   if (coordinates.length === 0) {
+    print("No hay coordenadas");
     return res.status(404).send({ message: 'Coordinates not found' });
   }
+  print("Enviadas: " + coordinates);
   res.status(200).send(coordinates);
 });
 
 // Ruta para borrar las coordenadas guardadas
 app.delete('/api/coordinates', (req, res) => {
   coordinates.length = 0;
+  print("Coordenadas borradas");
   res.status(200).send({ message: 'Coordinates deleted' });
 });
 
