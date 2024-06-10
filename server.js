@@ -9,6 +9,16 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
+// Cargar coordenadas desde el archivo JSON
+fs.readFile('coordenadas.json', (err, data) => {
+  if (err) {
+    console.error('Error leyendo el archivo de coordenadas:', err);
+    return;
+  }
+  coordinates = JSON.parse(data);
+  console.log('Coordenadas cargadas desde el archivo:', coordinates);
+});
+
 // Ruta para verificar que el servidor está funcionando
 app.get('/', (req, res) => {
   res.status(200).send({ message: 'Server is running' });
@@ -42,8 +52,6 @@ app.delete('/api/coordinates', (req, res) => {
   console.log("Coordenadas borradas");
   res.status(200).send({ message: 'Coordinates deleted' });
 });
-
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
