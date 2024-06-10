@@ -1,9 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const fs = require('fs'); // Módulo para leer archivos del sistema de archivos
 const app = express();
 
-const coordinates = []; // Aquí se almacenarán las coordenadas GPS
+
+let coordinates = []; // Aquí se almacenarán las coordenadas GPS
 
 app.use(cors());
 app.use(bodyParser.json());
