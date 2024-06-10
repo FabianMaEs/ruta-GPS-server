@@ -1,9 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const fs = require('fs'); // Módulo para leer archivos del sistema de archivos
+const fs = require('fs'); // Módulo para leer y escribir archivos del sistema de archivos
 const app = express();
-
 
 let coordinates = []; // Aquí se almacenarán las coordenadas GPS
 
@@ -11,7 +10,18 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Cargar coordenadas desde el archivo JSON
+// Función para guardar las coordenadas en el archivo JSON
+function guardarCoordenadas() {
+  fs.writeFile('coordenadas.json', JSON.stringify(coordinates), err => {
+    if (err) {
+      console.error('Error guardando coordenadas:', err);
+    } else {
+      console.log('Coordenadas guardadas en el archivo.');
+    }
+  });
+}
+
+// Cargar coordenadas desde el archivo JSON al iniciar la aplicación
 fs.readFile('coordenadas.json', (err, data) => {
   if (err) {
     console.error('Error leyendo el archivo de coordenadas:', err);
@@ -21,17 +31,13 @@ fs.readFile('coordenadas.json', (err, data) => {
   console.log('Coordenadas cargadas desde el archivo:', coordinates);
 });
 
-// Ruta para verificar que el servidor está funcionando
-app.get('/', (req, res) => {
-  res.status(200).send({ message: 'Server is running' });
-});
-
 // Ruta para recibir y guardar las coordenadas
 app.post('/api/coordinates', (req, res) => {
   const { latitude, longitude } = req.body;
   if (latitude && longitude) {
     coordinates.push({ latitude, longitude });
     console.log("Guardadas: " + coordinates);
+    guardarCoordenadas(); // Guardar coordenadas en el archivo después de agregarlas
     res.status(200).send({ message: 'Coordinates saved' });
   } else {
     res.status(400).send({ message: 'Invalid coordinates' });
@@ -50,8 +56,9 @@ app.get('/api/coordinates', (req, res) => {
 
 // Ruta para borrar las coordenadas guardadas
 app.delete('/api/coordinates', (req, res) => {
-  coordinates.length = 0;
+  coordinates = []; // Limpiar el arreglo de coordenadas
   console.log("Coordenadas borradas");
+  guardarCoordenadas(); // Guardar las coordenadas vacías en el archivo
   res.status(200).send({ message: 'Coordinates deleted' });
 });
 
