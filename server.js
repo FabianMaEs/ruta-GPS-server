@@ -32,6 +32,8 @@ fs.readFile('coordenadas.json', (err, data) => {
 });
 
 // Ruta para recibir y guardar las coordenadas
+// Ejemplo de solicitud POST: { "latitude": 19.4326, "longitude": -99.1332 }
+// Ejemplo de otra solicitud POST con 
 app.post('/api/coordinates', (req, res) => {
   const { latitude, longitude } = req.body;
   if (latitude && longitude) {
@@ -43,6 +45,21 @@ app.post('/api/coordinates', (req, res) => {
     res.status(400).send({ message: 'Invalid coordinates' });
   }
 });
+
+// Se pasa esta cadena al post: {\"lat\": \"" + lat + "\", \"lon\": \"" + lon + "\"}"; extraer y guardar en coordenadas.json
+app.post('/api/coordinates2', (req, res) => {
+  const { lat, lon } = req.body;
+  console.log("Recibidas: " + lat + ", " + lon);
+  if (lat && lon) {
+    coordinates.push({ latitude: lat, longitude: lon });
+    console.log("Guardadas: " + coordinates);
+    guardarCoordenadas(); // Guardar coordenadas en el archivo después de agregarlas
+    res.status(200).send({ message: 'Coordinates saved' });
+  } else {
+    res.status(400).send({ message: 'Invalid coordinates' });
+  }
+});
+
 
 // Ruta para obtener las coordenadas guardadas
 app.get('/api/coordinates', (req, res) => {
