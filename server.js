@@ -63,7 +63,7 @@ app.get('/api/coordinates', (req, res) => {
     logWithTimestamp('No hay coordenadas disponibles');
     return res.status(404).send({ message: 'Coordinates not found' });
   }
-  logWithTimestamp('Coordenadas enviadas: ' + JSON.stringify(coordinates));
+  //logWithTimestamp('Coordenadas enviadas: ' + JSON.stringify(coordinates));
   res.status(200).send(coordinates);
 });
 
