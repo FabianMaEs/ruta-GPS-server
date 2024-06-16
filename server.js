@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const fs = require('fs');
 const moment = require('moment-timezone');
+const { log } = require('console');
 const app = express();
 
 let coordinates = [];
@@ -47,6 +48,7 @@ fs.readFile('coordenadas.json', (err, data) => {
 });
 
 app.post('/api/coordinates', (req, res) => {
+  logWithTimestamp('Petición POST: ' + req.body);
   const { latitude, longitude } = req.body;
   if (typeof latitude !== 'number' || typeof longitude !== 'number') {
     return res.status(400).send({ message: 'Invalid coordinates format' });
