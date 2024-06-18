@@ -11,6 +11,10 @@ let coordinates = [];
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'interest-cohort=()'); // Asegúrate de que esté bien configurado según tu necesidad y las especificaciones actuales.
+  next();
+});
 
 function getMexicoTime() {
   return moment.tz("America/Mexico_City").format('YYYY-MM-DD HH:mm:ss');
