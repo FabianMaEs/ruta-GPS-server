@@ -66,6 +66,7 @@ app.get('/api/coordinates', (req, res) => {
     logWithTimestamp('No hay coordenadas disponibles');
     return res.status(404).send({ message: 'Coordinates not found' });
   }
+  //logWithTimestamp('Coordenadas enviadas: ' + JSON.stringify(coordinates));
   res.status(200).send(coordinates);
 });
 
@@ -74,6 +75,7 @@ app.delete('/api/coordinates', (req, res) => {
   logWithTimestamp('Coordenadas borradas');
   guardarCoordenadas();
   res.status(200).send({ message: 'Coordinates deleted' });
+  // Escribir en log.txt
   logWithTimestamp('--------- Todas las coordenadas han sido borradas ---------');
 });
 
@@ -83,6 +85,7 @@ app.get('/log', (req, res) => {
       logWithTimestamp('Error leyendo el archivo de log: ' + err);
       return res.status(500).send({ message: 'Error reading log file' });
     }
+    // Reemplazar saltos de línea por <br> tags
     const formattedData = data.replace(/\n/g, '<br>');
     res.status(200).send(formattedData);
   });
