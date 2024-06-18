@@ -92,17 +92,34 @@ app.post('/api/coordinates', (req, res) => {
   }
 
   axiosInstance.post('https://proyecto-electronica-34053442d1e0.herokuapp.com/api/coordinates', { latitude, longitude })
-    .then(response => {
-      logWithTimestamp('Respuesta del servidor: ' + JSON.stringify(response.data));
-      coordinates.push({ latitude, longitude });
-      logWithTimestamp('Coordenadas recibidas: ' + JSON.stringify({ latitude, longitude }));
-      guardarCoordenadas();
-      res.status(200).send({ message: 'Coordinates saved' });
-    })
-    .catch(error => {
-      logWithTimestamp('Error en la solicitud POST: ' + error.message);
+  .then(response => {
+    logWithTimestamp('Respuesta del servidor: ' + JSON.stringify(response.data));
+    coordinates.push({ latitude, longitude });
+    logWithTimestamp('Coordenadas recibidas: ' + JSON.stringify({ latitude, longitude }));
+    guardarCoordenadas();
+    res.status(200).send({ message: 'Coordinates saved' });
+  })
+  .catch(error => {
+    if (error.response) {
+      // La solicitud fue hecha y el servidor respondió con un código de estado que no está en el rango de 2xx
+      logWithTimestamp('Error en la solicitud POST: ' + error.response.status + ' ' + error.response.statusText);
       res.status(500).send({ message: 'Error saving coordinates' });
-    });
+    } else if (error.request) {
+      // La solicitud fue hecha pero no se recibió respuesta
+      logWithTimestamp('No se recibió respuesta del servidor');
+      res.status(500).send({ message: 'No response from server' });
+    } else {
+      // Error configurando la solicitud
+      logWithTimestamp('Error configurando la solicitud: ' + error.message);
+      res.status(500).send({ message: 'Error setting up request' });
+    }
+    // Capturar errores de SSL/TLS específicamente
+    if (error.message.includes('SSL')) {
+      logWithTimestamp('Error SSL/TLS: ' + error.message);
+      // Aquí podrías intentar ajustar la configuración de TLS o SSL según sea necesario
+    }
+  });
+
 });
 
 app.get('/api/coordinates', (req, res) => {
