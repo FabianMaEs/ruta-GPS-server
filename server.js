@@ -1,9 +1,9 @@
+const axios = require('axios');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const fs = require('fs');
 const moment = require('moment-timezone');
-const axios = require('axios'); // Añadir Axios
 const app = express();
 
 let coordinates = [];
@@ -47,33 +47,38 @@ fs.readFile('coordenadas.json', (err, data) => {
   logWithTimestamp('Coordenadas cargadas desde el archivo: ' + JSON.stringify(coordinates));
 });
 
+// Configuración para usar el proxy de Fixie con Axios
 const fixieUrl = process.env.FIXIE_URL;
 if (!fixieUrl) {
   console.error('La variable de entorno FIXIE_URL no está configurada.');
   process.exit(1); // Salir del proceso con un código de error
 }
 
-// Configuración para usar el proxy de Fixie con Axios
+// Extraer host, puerto y credenciales del FIXIE_URL
+const fixieParts = fixieUrl.match(/^https?:\/\/([^:]+):([^@]+)@([^:]+):(\d+)/);
+if (!fixieParts) {
+  console.error('Formato de FIXIE_URL no válido.');
+  process.exit(1); // Salir del proceso con un código de error
+}
+
 const axiosInstance = axios.create({
   proxy: {
-    host: fixieUrl.split('@')[1].split(':')[0],
-    port: fixieUrl.split(':')[2],
+    host: fixieParts[3],
+    port: parseInt(fixieParts[4]),
     auth: {
-      username: fixieUrl.split('//')[1].split(':')[0],
-      password: fixieUrl.split(':')[1].split('@')[0]
+      username: fixieParts[1],
+      password: fixieParts[2]
     }
   }
 });
 
 app.post('/api/coordinates', (req, res) => {
-  logWithTimestamp('Petición POST req.body:  ' + req.body);
-  logWithTimestamp('Petición POST stringify: ' + JSON.stringify(req.body)); // Asegúrate de serializar correctamente req.body para el registro
+  logWithTimestamp('Petición POST req.body: ' + JSON.stringify(req.body));
   const { latitude, longitude } = req.body;
   if (typeof latitude !== 'number' || typeof longitude !== 'number') {
     return res.status(400).send({ message: 'Invalid coordinates format' });
   }
 
-  // Hacer la solicitud POST usando axiosInstance que está configurado con el proxy de Fixie
   axiosInstance.post('https://proyecto-electronica-34053442d1e0.herokuapp.com/api/coordinates', { latitude, longitude })
     .then(response => {
       logWithTimestamp('Respuesta del servidor: ' + JSON.stringify(response.data));
@@ -93,7 +98,6 @@ app.get('/api/coordinates', (req, res) => {
     logWithTimestamp('No hay coordenadas disponibles');
     return res.status(404).send({ message: 'Coordinates not found' });
   }
-  //logWithTimestamp('Coordenadas enviadas: ' + JSON.stringify(coordinates));
   res.status(200).send(coordinates);
 });
 
@@ -102,7 +106,6 @@ app.delete('/api/coordinates', (req, res) => {
   logWithTimestamp('Coordenadas borradas');
   guardarCoordenadas();
   res.status(200).send({ message: 'Coordinates deleted' });
-  // Escribir en log.txt
   logWithTimestamp('--------- Todas las coordenadas han sido borradas ---------');
 });
 
@@ -112,7 +115,6 @@ app.get('/log', (req, res) => {
       logWithTimestamp('Error leyendo el archivo de log: ' + err);
       return res.status(500).send({ message: 'Error reading log file' });
     }
-    // Reemplazar saltos de línea por <br> tags
     const formattedData = data.replace(/\n/g, '<br>');
     res.status(200).send(formattedData);
   });
