@@ -38,13 +38,18 @@ function guardarCoordenadas() {
   });
 }
 
-fs.readFile('coordenadas.json', (err, data) => {
+fs.readFile('coordenadas.json', 'utf8', (err, data) => {
   if (err) {
     logWithTimestamp('Error leyendo el archivo de coordenadas: ' + err);
     return;
   }
-  coordinates = JSON.parse(data);
-  logWithTimestamp('Coordenadas cargadas desde el archivo: ' + JSON.stringify(coordinates));
+  
+  try {
+    const coordinates = JSON.parse(data);
+    logWithTimestamp('Coordenadas cargadas desde el archivo: ' + JSON.stringify(coordinates));
+  } catch (parseError) {
+    logWithTimestamp('Error al parsear el archivo de coordenadas: ' + parseError);
+  }
 });
 
 app.post('/api/coordinates', (req, res) => {
