@@ -91,6 +91,16 @@ app.get('/log', (req, res) => {
   });
 });
 
+function convertToDecimal(degreeMin, direction) {
+  const degrees = parseFloat(degreeMin.slice(0, -2));
+  const minutes = parseFloat(degreeMin.slice(-2));
+  let decimal = degrees + (minutes / 60);
+  if (direction === 'S' || direction === 'W') {
+    decimal *= -1;
+  }
+  return decimal;
+}
+
 app.get('/api/coordinates_string', (req, res) => {
   const query = req.query;
   const rawCoords = Object.keys(query)[0];
@@ -100,6 +110,7 @@ app.get('/api/coordinates_string', (req, res) => {
     return res.status(400).send({ message: 'Invalid coordinates format' });
   }
 
+  // Ajuste de partes para convertir correctamente
   const latitude = convertToDecimal(parts[0], parts[1]);
   const longitude = convertToDecimal(parts[2], parts[3]);
 
