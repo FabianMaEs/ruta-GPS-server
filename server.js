@@ -68,11 +68,11 @@ if (!fixieParts) {
 
 // Configurar una instancia de Axios con agentes HTTPS personalizados
 const agent = new https.Agent({
-  rejectUnauthorized: false, // Solo para pruebas, se debe configurar correctamente
-  secureProtocol: 'TLSv1_2_method', // Intenta con 'TLS_method' en lugar de 'TLSv1_2_method'
+  rejectUnauthorized: false, // Solo para pruebas, configúralo correctamente para producción
+  secureProtocol: 'TLSv1_2_method', // Usa 'TLSv1_2_method' en lugar de 'TLS_method'
   minVersion: 'TLSv1.2', // Establece la versión mínima que tu servidor destino soporte
-  maxVersion: 'TLSv1.3' // Intenta permitir TLS 1.3 si es posible
 });
+
 
 
 const axiosInstance = axios.create({
@@ -116,11 +116,7 @@ app.post('/api/coordinates', (req, res) => {
       logWithTimestamp('Error configurando la solicitud: ' + error.message);
       res.status(500).send({ message: 'Error setting up request' });
     }
-    // Capturar errores de SSL/TLS específicamente
-    if (error.message.includes('SSL')) {
-      logWithTimestamp('Error SSL/TLS: ' + error.message);
-      // Aquí podrías intentar ajustar la configuración de TLS o SSL según sea necesario
-    }
+    logWithTimestamp('Error completo: ' + error);
   });
 
 });
