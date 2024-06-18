@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const fs = require('fs');
 const moment = require('moment-timezone');
-const { log } = require('console');
+const axios = require('axios'); // Añadir Axios
 const app = express();
 
 let coordinates = [];
@@ -47,17 +47,45 @@ fs.readFile('coordenadas.json', (err, data) => {
   logWithTimestamp('Coordenadas cargadas desde el archivo: ' + JSON.stringify(coordinates));
 });
 
+const fixieUrl = process.env.FIXIE_URL;
+if (!fixieUrl) {
+  console.error('La variable de entorno FIXIE_URL no está configurada.');
+  process.exit(1); // Salir del proceso con un código de error
+}
+
+// Configuración para usar el proxy de Fixie con Axios
+const axiosInstance = axios.create({
+  proxy: {
+    host: fixieUrl.split('@')[1].split(':')[0],
+    port: fixieUrl.split(':')[2],
+    auth: {
+      username: fixieUrl.split('//')[1].split(':')[0],
+      password: fixieUrl.split(':')[1].split('@')[0]
+    }
+  }
+});
+
 app.post('/api/coordinates', (req, res) => {
-  logWithTimestamp('Petición POST: ' + req.body);
+  logWithTimestamp('Petición POST req.body:  ' + req.body);
+  logWithTimestamp('Petición POST stringify: ' + JSON.stringify(req.body)); // Asegúrate de serializar correctamente req.body para el registro
   const { latitude, longitude } = req.body;
   if (typeof latitude !== 'number' || typeof longitude !== 'number') {
     return res.status(400).send({ message: 'Invalid coordinates format' });
   }
 
-  coordinates.push({ latitude, longitude });
-  logWithTimestamp('Coordenadas recibidas: ' + JSON.stringify({ latitude, longitude }));
-  guardarCoordenadas();
-  res.status(200).send({ message: 'Coordinates saved' });
+  // Hacer la solicitud POST usando axiosInstance que está configurado con el proxy de Fixie
+  axiosInstance.post('https://proyecto-electronica-34053442d1e0.herokuapp.com/api/coordinates', { latitude, longitude })
+    .then(response => {
+      logWithTimestamp('Respuesta del servidor: ' + JSON.stringify(response.data));
+      coordinates.push({ latitude, longitude });
+      logWithTimestamp('Coordenadas recibidas: ' + JSON.stringify({ latitude, longitude }));
+      guardarCoordenadas();
+      res.status(200).send({ message: 'Coordinates saved' });
+    })
+    .catch(error => {
+      logWithTimestamp('Error en la solicitud POST: ' + error.message);
+      res.status(500).send({ message: 'Error saving coordinates' });
+    });
 });
 
 app.get('/api/coordinates', (req, res) => {
@@ -89,7 +117,6 @@ app.get('/log', (req, res) => {
     res.status(200).send(formattedData);
   });
 });
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
