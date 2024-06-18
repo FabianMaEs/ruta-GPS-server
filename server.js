@@ -56,7 +56,7 @@ app.post('/api/coordinates', (req, res) => {
   // Obtener hora actual en México
   const timestamp = getMexicoTime();
   coordinates.push({ latitude, longitude, timestamp });
-  logWithTimestamp('Coordenadas recibidas: ' + JSON.stringify({ latitude, longitudem, timestamp }));
+  logWithTimestamp('Coordenadas recibidas: ' + JSON.stringify({ latitude, longitude, timestamp }));
   guardarCoordenadas();
   res.status(200).send({ message: 'Coordinates saved' });
 });
@@ -111,13 +111,14 @@ app.get('/api/coordinates_string', (req, res) => {
   }
 
   // Ajuste de partes para convertir correctamente
-  const latitude = convertToDecimal(parts[0], parts[1]);
-  const longitude = convertToDecimal(parts[2], parts[3]);
+  const latitude = convertToDecimal(parts[0], parts[1]) / 10;
+  const longitude = convertToDecimal(parts[2], parts[3]) / 10;
 
   if (isNaN(latitude) || isNaN(longitude)) {
     logWithTimestamp('Formato de coordenadas inválido');
     return res.status(400).send({ message: 'Invalid coordinates format' });
   }
+
   // Obtener hora actual en México
   const timestamp = getMexicoTime();
   coordinates.push({ latitude, longitude, timestamp });
