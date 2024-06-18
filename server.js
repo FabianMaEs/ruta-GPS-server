@@ -69,10 +69,8 @@ if (!fixieParts) {
 // Configurar una instancia de Axios con agentes HTTPS personalizados
 const agent = new https.Agent({
   rejectUnauthorized: false, // Solo para pruebas, configúralo correctamente para producción
-  secureProtocol: 'TLSv1_2_method', // Usa solo una versión específica de TLS aquí, como 'TLSv1_2_method'
+  secureProtocol: 'TLSv1_3_method', // Usa 'TLSv1_3_method' si prefieres TLS 1.3
 });
-
-
 
 
 const axiosInstance = axios.create({
